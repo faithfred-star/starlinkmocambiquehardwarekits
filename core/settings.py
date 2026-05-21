@@ -1,5 +1,6 @@
 import os
 from pathlib import Path
+import sys
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -12,7 +13,6 @@ ALLOWED_HOSTS = [
     '127.0.0.1'
 ]
 
-
 # 📦 Apps
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -24,24 +24,30 @@ INSTALLED_APPS = [
     'orders',
 ]
 
-
-# ⚙️ Middleware
+# ⚙️ Middleware (Safely check for WhiteNoise)
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware',  # ✅ Static files in production
+]
+
+try:
+    import whitenoise
+    MIDDLEWARE.append('whitenoise.middleware.WhiteNoiseMiddleware')
+    HAS_WHITENOISE = True
+except ImportError:
+    HAS_WHITENOISE = False
+
+MIDDLEWARE.extend([
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-]
-
+])
 
 # 🔗 URLs & WSGI
 ROOT_URLCONF = 'core.urls'
 WSGI_APPLICATION = 'core.wsgi.application'
-
 
 # 🎨 Templates
 TEMPLATES = [
@@ -60,7 +66,6 @@ TEMPLATES = [
     },
 ]
 
-
 # 🗄️ Database (SQLite for now)
 DATABASES = {
     'default': {
@@ -69,7 +74,6 @@ DATABASES = {
     }
 }
 
-
 # 🔒 Password validation
 AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
@@ -77,7 +81,6 @@ AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator'},
     {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator'},
 ]
-
 
 # 🌍 Localization
 LANGUAGE_CODE = 'pt-pt'
@@ -90,18 +93,28 @@ STATIC_URL = '/static/'
 STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
-# ✅ Updated WhiteNoise config for Django 4.2 / 5.x
-STORAGES = {
-    "default": {
-        "BACKEND": "django.core.files.storage.FileSystemStorage",
-    },
-    "staticfiles": {
-        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
-    },
-}
+# ✅ Dynamic WhiteNoise Storage configuration for Django 4.2+
+if HAS_WHITENOISE:
+    STORAGES = {
+        "default": {
+            "BACKEND": "django.core.files.storage.FileSystemStorage",
+        },
+        "staticfiles": {
+            "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+        },
+    }
+else:
+    STORAGES = {
+        "default": {
+            "BACKEND": "django.core.files.storage.FileSystemStorage",
+        },
+        "staticfiles": {
+            "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
+        },
+    }
+
 # 🧱 Default primary key
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-
 
 # 🤖 Telegram (from environment variables)
 TELEGRAM_BOT_TOKEN = os.environ.get('TELEGRAM_BOT_TOKEN')
