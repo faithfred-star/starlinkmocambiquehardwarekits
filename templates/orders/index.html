@@ -1,73 +1,259 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block content %}
-<div class="starlink-bg min-h-[60vh] flex flex-col justify-center items-center text-center p-6 relative rounded-2xl overflow-hidden mb-12 border border-white/10">
-    <div class="absolute inset-0 bg-black/60 z-0"></div>
-    <div class="relative z-10 max-w-3xl space-y-4">
+<div class="starlink-bg min-h-screen py-12 px-4">
+    <div class="max-w-6xl mx-auto text-center mb-16 space-y-4 pt-8">
         <span class="text-xs text-cyan-400 font-bold uppercase tracking-[0.3em]">Distribuidor Autorizado</span>
-        <h1 class="text-4xl md:text-6xl font-black uppercase tracking-tight text-white">Starlink Moçambique</h1>
-        <p class="text-gray-300 text-sm md:text-base max-w-xl mx-auto">
-            Internet de alta velocidade por satélite de baixa órbita terrestre. Conectividade ultra-rápida e estável em qualquer província ou distrito.
+        <h1 class="text-4xl md:text-6xl font-black uppercase tracking-tight text-white">Equipamento Starlink</h1>
+        <p class="text-gray-400 text-sm md:text-base max-w-xl mx-auto uppercase tracking-wider">
+            Internet de alta velocidade por satélite em qualquer lugar de Moçambique.
         </p>
     </div>
-</div>
 
-<div class="max-w-7xl mx-auto px-4">
-    <div class="border-b border-white/10 pb-4 mb-8">
-        <h2 class="text-xl font-bold uppercase tracking-widest text-white">Kits & Equipamentos Disponíveis</h2>
-        <p class="text-gray-500 text-xs uppercase">Selecione o hardware ideal para a sua necessidade</p>
-    </div>
+    <div class="max-w-6xl mx-auto mb-20">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            
+            <div class="glass-card p-6 flex flex-col justify-between items-center text-center relative group min-h-[500px]">
+                <div class="w-full h-48 flex items-center justify-center mb-6">
+                    <img src="{% static 'img/1.jpg' %}" alt="Kit Gen 3" class="max-h-full max-w-full object-contain">
+                </div>
+                <div class="w-full space-y-4 flex-grow flex flex-col justify-end">
+                    <div>
+                        <h2 class="text-2xl font-bold tracking-wide text-white uppercase">Kit Gen 3</h2>
+                        <p class="text-xs text-gray-400 mt-2 line-clamp-3">Sistema de satélite de nova geração com matriz de fase eletrónica, ultra-baixa latência e Wi-Fi 6 de nível empresarial para ambientes de alta densidade.</p>
+                    </div>
+                    <div class="text-2xl font-bold text-cyan-400 font-mono py-2">3.500 MT</div>
+                    <div class="grid grid-cols-2 gap-3 pt-2">
+                        <button onclick="openSpecs('gen3')" class="border border-white/20 text-xs font-bold py-3 rounded uppercase tracking-wider hover:bg-white/10 transition-colors">Especificações</button>
+                        <a href="{% url 'checkout' %}?kit=1" class="bg-white text-black text-xs font-bold py-3 rounded uppercase tracking-wider hover:bg-cyan-400 hover:text-black transition-colors flex items-center justify-center">Pedir Agora</a>
+                    </div>
+                </div>
+            </div>
 
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-        <div class="glass-card overflow-hidden flex flex-col group hover:border-cyan-400/50 transition-all duration-300">
-            <div class="h-64 p-6 flex items-center justify-center bg-white/[0.02] border-b border-white/5 relative">
-                <img src="/static/img/1.jpg" alt="Kit Gen 3 Standard" class="max-h-full max-w-full object-contain group-hover:scale-105 transition-transform duration-300">
-                <span class="absolute top-4 right-4 bg-cyan-400 text-black text-[9px] font-black uppercase px-2 py-1 rounded">Mais Popular</span>
-            </div>
-            <div class="p-6 flex-grow flex flex-col justify-between space-y-6">
-                <div>
-                    <h3 class="text-lg font-bold text-white uppercase">Kit Gen 3 Standard (Novo)</h3>
-                    <p class="text-xs text-gray-400 mt-2 line-clamp-2">Ideal para residências, escritórios e pequenas empresas. Maior alcance Wi-Fi 6 integrado.</p>
+            <div class="glass-card p-6 flex flex-col justify-between items-center text-center relative group min-h-[500px]">
+                <div class="w-full h-48 flex items-center justify-center mb-6">
+                    <img src="{% static 'img/2.jpg' %}" alt="Kit Gen 2" class="max-h-full max-w-full object-contain">
                 </div>
-                <div class="flex justify-between items-center pt-4 border-t border-white/5">
-                    <span class="text-xl font-mono font-bold text-cyan-400">3,500 MT</span>
-                    <a href="{% url 'checkout' %}?kit=1" class="bg-white text-black text-xs font-bold px-4 py-3 rounded uppercase tracking-wider hover:bg-cyan-400 hover:text-black transition-colors">Comprar</a>
+                <div class="w-full space-y-4 flex-grow flex flex-col justify-end">
+                    <div>
+                        <h2 class="text-2xl font-bold tracking-wide text-white uppercase">Kit Gen 2</h2>
+                        <p class="text-xs text-gray-400 mt-2 line-clamp-3">Kit de satélite residencial altamente fiável com alinhamento motorizado automático e desempenho estável de banda larga.</p>
+                    </div>
+                    <div class="text-2xl font-bold text-cyan-400 font-mono py-2">2.500 MT</div>
+                    <div class="grid grid-cols-2 gap-3 pt-2">
+                        <button onclick="openSpecs('gen2')" class="border border-white/20 text-xs font-bold py-3 rounded uppercase tracking-wider hover:bg-white/10 transition-colors">Especificações</button>
+                        <a href="{% url 'checkout' %}?kit=2" class="bg-white text-black text-xs font-bold py-3 rounded uppercase tracking-wider hover:bg-cyan-400 hover:text-black transition-colors flex items-center justify-center">Pedir Agora</a>
+                    </div>
                 </div>
             </div>
-        </div>
 
-        <div class="glass-card overflow-hidden flex flex-col group hover:border-cyan-400/50 transition-all duration-300">
-            <div class="h-64 p-6 flex items-center justify-center bg-white/[0.02] border-b border-white/5">
-                <img src="/static/img/2.jpg" alt="Kit Gen 2 Actuated" class="max-h-full max-w-full object-contain group-hover:scale-105 transition-transform duration-300">
-            </div>
-            <div class="p-6 flex-grow flex flex-col justify-between space-y-6">
-                <div>
-                    <h3 class="text-lg font-bold text-white uppercase">Kit Gen 2 (Actuated)</h3>
-                    <p class="text-xs text-gray-400 mt-2 line-clamp-2">Antena motorizada com auto-orientador de sinal via satélite. Desempenho sólido de mercado.</p>
+            <div class="glass-card p-6 flex flex-col justify-between items-center text-center relative group min-h-[500px]">
+                <div class="w-full h-48 flex items-center justify-center mb-6">
+                    <img src="{% static 'img/mini.jpg' %}" alt="Starlink Mini" class="max-h-full max-w-full object-contain">
                 </div>
-                <div class="flex justify-between items-center pt-4 border-t border-white/5">
-                    <span class="text-xl font-mono font-bold text-cyan-400">2,500 MT</span>
-                    <a href="{% url 'checkout' %}?kit=2" class="bg-white text-black text-xs font-bold px-4 py-3 rounded uppercase tracking-wider hover:bg-cyan-400 hover:text-black transition-colors">Comprar</a>
+                <div class="w-full space-y-4 flex-grow flex flex-col justify-end">
+                    <div>
+                        <h2 class="text-2xl font-bold tracking-wide text-white uppercase">Starlink Mini</h2>
+                        <p class="text-xs text-gray-400 mt-2 line-clamp-3">Sistema de satélite compacto ultra-portátil concebido para mobilidade, viagens e conectividade total fora da rede.</p>
+                    </div>
+                    <div class="text-2xl font-bold text-cyan-400 font-mono py-2">1.500 MT</div>
+                    <div class="grid grid-cols-2 gap-3 pt-2">
+                        <button onclick="openSpecs('mini')" class="border border-white/20 text-xs font-bold py-3 rounded uppercase tracking-wider hover:bg-white/10 transition-colors">Especificações</button>
+                        <a href="{% url 'checkout' %}?kit=mini" class="bg-white text-black text-xs font-bold py-3 rounded uppercase tracking-wider hover:bg-cyan-400 hover:text-black transition-colors flex items-center justify-center">Pedir Agora</a>
+                    </div>
                 </div>
             </div>
-        </div>
 
-        <div class="glass-card overflow-hidden flex flex-col group hover:border-cyan-400/50 transition-all duration-300">
-            <div class="h-64 p-6 flex items-center justify-center bg-white/[0.02] border-b border-white/5 relative">
-                <img src="/static/img/mini.jpg" alt="Starlink Mini" class="max-h-full max-w-full object-contain group-hover:scale-105 transition-transform duration-300">
-                <span class="absolute top-4 right-4 bg-purple-500 text-white text-[9px] font-black uppercase px-2 py-1 rounded">Portátil</span>
-            </div>
-            <div class="p-6 flex-grow flex flex-col justify-between space-y-6">
-                <div>
-                    <h3 class="text-lg font-bold text-white uppercase">Starlink Mini Portable</h3>
-                    <p class="text-xs text-gray-400 mt-2 line-clamp-2">Ultra-compacto com roteador Wi-Fi integrado diretamente no chassi da antena. Ideal para viagens.</p>
-                </div>
-                <div class="flex justify-between items-center pt-4 border-t border-white/5">
-                    <span class="text-xl font-mono font-bold text-cyan-400">1,500 MT</span>
-                    <a href="{% url 'checkout' %}?kit=mini" class="bg-white text-black text-xs font-bold px-4 py-3 rounded uppercase tracking-wider hover:bg-cyan-400 hover:text-black transition-colors">Comprar</a>
-                </div>
-            </div>
         </div>
     </div>
+
+    <div class="max-w-5xl mx-auto">
+        <div class="text-center mb-10">
+            <h2 class="text-lg font-bold uppercase tracking-[0.3em] text-gray-400">Acessórios Essenciais</h2>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+            <div class="glass-card p-5 flex flex-col justify-between items-center text-center">
+                <div class="w-full h-32 bg-white/5 rounded-xl p-3 flex items-center justify-center mb-4">
+                    <img src="{% static 'img/pivot.jpg' %}" alt="Suporte Pivotante" class="max-h-full max-w-full object-contain">
+                </div>
+                <div class="w-full space-y-2">
+                    <h3 class="text-sm font-bold uppercase tracking-wider text-white">Suporte Pivotante</h3>
+                    <div class="text-cyan-400 font-mono text-sm font-bold">500 MT</div>
+                    <div class="grid grid-cols-2 gap-2 pt-2">
+                        <button onclick="openSpecs('pivot')" class="border border-white/10 text-[10px] font-bold py-2 rounded uppercase hover:bg-white/5">Specs</button>
+                        <a href="{% url 'checkout' %}?kit=adaptor" class="bg-white/10 text-white text-[10px] font-bold py-2 rounded uppercase hover:bg-cyan-400 hover:text-black transition-colors flex items-center justify-center">Adicionar</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="glass-card p-5 flex flex-col justify-between items-center text-center">
+                <div class="w-full h-32 bg-white/5 rounded-xl p-3 flex items-center justify-center mb-4">
+                    <img src="{% static 'img/adaptor.jpg' %}" alt="Adaptador Ethernet" class="max-h-full max-w-full object-contain">
+                </div>
+                <div class="w-full space-y-2">
+                    <h3 class="text-sm font-bold uppercase tracking-wider text-white">Adaptador Ethernet</h3>
+                    <div class="text-cyan-400 font-mono text-sm font-bold">450 MT</div>
+                    <div class="grid grid-cols-2 gap-2 pt-2">
+                        <button onclick="openSpecs('adaptor')" class="border border-white/10 text-[10px] font-bold py-2 rounded uppercase hover:bg-white/5">Specs</button>
+                        <a href="{% url 'checkout' %}?kit=adaptor" class="bg-white/10 text-white text-[10px] font-bold py-2 rounded uppercase hover:bg-cyan-400 hover:text-black transition-colors flex items-center justify-center">Adicionar</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="glass-card p-5 flex flex-col justify-between items-center text-center">
+                <div class="w-full h-32 bg-white/5 rounded-xl p-3 flex items-center justify-center mb-4">
+                    <img src="{% static 'img/mesh.jpg' %}" alt="Nó Mesh Wi-Fi" class="max-h-full max-w-full object-contain">
+                </div>
+                <div class="w-full space-y-2">
+                    <h3 class="text-sm font-bold uppercase tracking-wider text-white">Nó Mesh Wi-Fi</h3>
+                    <div class="text-cyan-400 font-mono text-sm font-bold">900 MT</div>
+                    <div class="grid grid-cols-2 gap-2 pt-2">
+                        <button onclick="openSpecs('mesh')" class="border border-white/10 text-[10px] font-bold py-2 rounded uppercase hover:bg-white/5">Specs</button>
+                        <a href="{% url 'checkout' %}?kit=mesh" class="bg-white/10 text-white text-[10px] font-bold py-2 rounded uppercase hover:bg-cyan-400 hover:text-black transition-colors flex items-center justify-center">Adicionar</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="glass-card p-5 flex flex-col justify-between items-center text-center">
+                <div class="w-full h-32 bg-white/5 rounded-xl p-3 flex items-center justify-center mb-4">
+                    <img src="{% static 'img/cable.jpg' %}" alt="Cabo de 75ft" class="max-h-full max-w-full object-contain">
+                </div>
+                <div class="w-full space-y-2">
+                    <h3 class="text-sm font-bold uppercase tracking-wider text-white">Cabo de 75ft</h3>
+                    <div class="text-cyan-400 font-mono text-sm font-bold">600 MT</div>
+                    <div class="grid grid-cols-2 gap-2 pt-2">
+                        <button onclick="openSpecs('cable')" class="border border-white/10 text-[10px] font-bold py-2 rounded uppercase hover:bg-white/5">Specs</button>
+                        <a href="{% url 'checkout' %}?kit=cable" class="bg-white/10 text-white text-[10px] font-bold py-2 rounded uppercase hover:bg-cyan-400 hover:text-black transition-colors flex items-center justify-center">Adicionar</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
+
+<div id="specs-modal" class="fixed inset-0 bg-black/80 backdrop-blur-md hidden items-center justify-center z-50 p-4">
+    <div class="glass-card max-w-md w-full p-6 relative border border-cyan-400/30">
+        <button onclick="closeSpecs()" class="absolute top-4 right-4 text-gray-400 hover:text-white text-xl">&times;</button>
+        <h3 id="modal-title" class="text-xl font-bold text-white uppercase tracking-wider mb-4">---</h3>
+        <div id="modal-body" class="text-xs text-gray-300 space-y-2 font-mono">
+            </div>
+    </div>
+</div>
+
+<script>
+    const specsData = {
+        'gen3': [
+            'Velocidade de Download: 150–250+ Mbps',
+            'Velocidade de Upload: 20–40 Mbps',
+            'Latência: 20–40 ms (Satélite LEO)',
+            'Wi-Fi: Wi-Fi 6 Tri-band (802.11ax)',
+            'Cobertura: Até 300m² internos',
+            'Antena: Matriz eletrónica faseada',
+            'Campo de Visão: 110° com rastreio de ângulo amplo',
+            'Resistência Climatérica: IP67 (Poeira e imersão em água)',
+            'Temperatura de Operação: -30°C a +50°C',
+            'Consumo de Energia: Média de 75–100W',
+            'Ethernet: Suportado diretamente',
+            'Alinhamento Automático: Sim (Livre de motores de desgaste)'
+        ],
+        'gen2': [
+            'Velocidade de Download: 100–200 Mbps',
+            'Velocidade de Upload: 10–30 Mbps',
+            'Latência: 25–50 ms',
+            'Wi-Fi: Wi-Fi 5 Dual-band (802.11ac)',
+            'Cobertura: Até 200m² internos',
+            'Tipo de Antena: Auto-alinhamento motorizado',
+            'Campo de Visão: 100° de cobertura do céu',
+            'Resistência Climatérica: Classificação IP54',
+            'Temperatura de Operação: -30°C a +50°C',
+            'Consumo de Energia: Média de 50–75W',
+            'Ethernet: Requer adaptador ethernet adicional',
+            'Cabo Incluído: Cabo de 75ft incluído no kit'
+        ],
+        'mini': [
+            'Velocidade de Download: 50–150 Mbps',
+            'Velocidade de Upload: 10–20 Mbps',
+            'Latência: 30–60 ms',
+            'Wi-Fi: Roteador integrado de banda dupla',
+            'Cobertura: Até 100m²',
+            'Portabilidade: Design ultraleve e compacto',
+            'Entrada de Energia: DC (compatível com carro e painel solar)',
+            'Consumo de Energia: Baixo consumo de 25–40W',
+            'Tempo de Configuração: Menos de 5 minutos',
+            'Caso de Uso: Viagens, campismo e escritórios móveis',
+            'Suporte a Roaming: Conectividade móvel sempre ativa'
+        ],
+        'pivot': [
+            'Material: Aço premium revestido com pintura eletrostática',
+            'Compatibilidade: Kits Starlink Gen 2 e Gen 3',
+            'Tipo de Montagem: Pivô ajustável para telhado ou parede',
+            'Ajustabilidade: Inclinação multi-ângulo',
+            'Resistência ao Vento: Design de alta estabilidade estrutural',
+            'Instalação: Fixação por parafusos ultra-segura'
+        ],
+        'adaptor': [
+            'Tipo de Porta: Ethernet Gigabit RJ45',
+            'Velocidade de Rede: Até 1 Gbps nativos',
+            'Compatibilidade: Starlink Gen 2 e Gen 3',
+            'Casos de Uso: Conexão de roteadores, switches ou MikroTik',
+            'Instalação: Plug & Play imediato',
+            'Latência: Conexão cabeada com ultra-baixa latência'
+        ],
+        'mesh': [
+            'Wi-Fi: Sistema de rede Mesh inteligente de banda dupla',
+            'Aumento de Cobertura: Adiciona +150–200m² por nó',
+            'Roaming Contínuo: Transição automática sem quedas de sinal',
+            'Configuração: Emparelhamento automático via App Starlink',
+            'Casos de Uso: Grandes residências, armazéns e escritórios',
+            'Desempenho: Handover inteligente de baixa latência'
+        ],
+        'cable': [
+            'Comprimento: 75 Pés (22.8 metros)',
+            'Tipo de Cabo: Cabo Starlink blindado de alto rendimento',
+            'Perda de Sinal: Atenuação mínima e sem interferências',
+            'Resistência: Classificação para uso exterior e proteção UV',
+            'Durabilidade: Isolamento reforçado de longa duração',
+            'Compatibilidade: Todos os kits Starlink suportados'
+        ]
+    };
+
+    function openSpecs(key) {
+        const modal = document.getElementById('specs-modal');
+        const title = document.getElementById('modal-title');
+        const body = document.getElementById('modal-body');
+        
+        let productName = '';
+        if(key === 'gen3') productName = 'Kit Gen 3';
+        else if(key === 'gen2') productName = 'Kit Gen 2';
+        else if(key === 'mini') productName = 'Starlink Mini';
+        else if(key === 'pivot') productName = 'Suporte Pivotante';
+        else if(key === 'adaptor') productName = 'Adaptor Ethernet';
+        else if(key === 'mesh') productName = 'Nó Mesh Wi-Fi';
+        else if(key === 'cable') productName = 'Cabo de Extensão 75ft';
+
+        const info = specsData[key] || ['Nenhuma especificação disponível.'];
+        title.innerText = productName + ' - Ficha Técnica';
+        
+        body.innerHTML = info.map(item => {
+            const parts = item.split(':');
+            const label = parts[0];
+            const value = parts.slice(1).join(':'); // Garante que não quebra se houver outros dois pontos
+            return `<div class="border-b border-white/5 pb-1 mb-1 flex flex-col sm:flex-row sm:justify-between gap-1">
+                        <span class="text-gray-400">• ${label}</span>
+                        <span class="text-cyan-400 font-bold text-right">${value || ''}</span>
+                    </div>`;
+        }).join('');
+        
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+    }
+
+    function closeSpecs() {
+        const modal = document.getElementById('specs-modal');
+        modal.classList.remove('flex');
+        modal.classList.add('hidden');
+    }
+</script>
 {% endblock %}
