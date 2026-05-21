@@ -1,12 +1,12 @@
 import os
 from pathlib import Path
-import sys
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # 🔐 Security
-SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-fallback-key')
+SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-fallback-key-change-in-production')
 DEBUG = os.environ.get('DEBUG', 'False') == 'True'
+
 ALLOWED_HOSTS = [
     'starlinkmocambiquehardwarekits.onrender.com',
     'localhost',
@@ -24,26 +24,17 @@ INSTALLED_APPS = [
     'orders',
 ]
 
-# ⚙️ Middleware (Safely check for WhiteNoise)
+# ⚙️ Middleware (Configuração direta e estável do WhiteNoise)
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
-]
-
-try:
-    import whitenoise
-    MIDDLEWARE.append('whitenoise.middleware.WhiteNoiseMiddleware')
-    HAS_WHITENOISE = True
-except ImportError:
-    HAS_WHITENOISE = False
-
-MIDDLEWARE.extend([
+    'whitenoise.middleware.WhiteNoiseMiddleware',  # Posicionado logo após SecurityMiddleware
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-])
+]
 
 # 🔗 URLs & WSGI
 ROOT_URLCONF = 'core.urls'
@@ -66,7 +57,7 @@ TEMPLATES = [
     },
 ]
 
-# 🗄️ Database (SQLite for now)
+# 🗄️ Database (SQLite estável para produção local/Render básica)
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
@@ -88,35 +79,25 @@ TIME_ZONE = 'Africa/Maputo'
 USE_I18N = True
 USE_TZ = True
 
-# 📁 Static files (IMPORTANT FOR RENDER)
+# 📁 Static files (CONFIGURAÇÃO DE ALTA TOLERÂNCIA DA RENDER)
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
-# ✅ Dynamic WhiteNoise Storage configuration for Django 4.2+
-if HAS_WHITENOISE:
-    STORAGES = {
-        "default": {
-            "BACKEND": "django.core.files.storage.FileSystemStorage",
-        },
-        "staticfiles": {
-            "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
-        },
-    }
-else:
-    STORAGES = {
-        "default": {
-            "BACKEND": "django.core.files.storage.FileSystemStorage",
-        },
-        "staticfiles": {
-            "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
-        },
-    }
+# ✅ Nova configuração do Django 4.2+ tolerante a falhas de imagens ausentes
+STORAGES = {
+    "default": {
+        "BACKEND": "django.core.files.storage.FileSystemStorage",
+    },
+    "staticfiles": {
+        # O uso do CompressedStaticFilesStorage impede que o erro 500 ocorra caso falte alguma imagem local no build
+        "BACKEND": "whitenoise.storage.CompressedStaticFilesStorage",
+    },
+}
 
 # 🧱 Default primary key
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# 🤖 Telegram (from environment variables)
-TELEGRAM_BOT_TOKEN = os.environ.get('TELEGRAM_BOT_TOKEN')
-TELEGRAM_CHAT_ID = os.environ.get('TELEGRAM_CHAT_ID')
-# FORCE_DEPLOY_RESET = True
+# 🤖 Telegram (com fallback seguro para não travar o carregamento do servidor)
+TELEGRAM_BOT_TOKEN = os.environ.get('TELEGRAM_BOT_TOKEN', 'NENHUM_TOKEN_CONFIGURADO')
+TELEGRAM_CHAT_ID = os.environ.get('TELEGRAM_CHAT_ID', 'NENHUM_ID_CONFIGURADO')
