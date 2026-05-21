@@ -6,7 +6,11 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # 🔐 Security
 SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-fallback-key')
 DEBUG = os.environ.get('DEBUG', 'False') == 'True'
-ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', '*').split(',')
+ALLOWED_HOSTS = [
+    'starlinkmocambiquehardwarekits.onrender.com',
+    'localhost',
+    '127.0.0.1'
+]
 
 
 # 📦 Apps
@@ -81,16 +85,20 @@ TIME_ZONE = 'Africa/Maputo'
 USE_I18N = True
 USE_TZ = True
 
-
 # 📁 Static files (IMPORTANT FOR RENDER)
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
-# ✅ WhiteNoise config
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
-
-
+# ✅ Updated WhiteNoise config for Django 4.2 / 5.x
+STORAGES = {
+    "default": {
+        "BACKEND": "django.core.files.storage.FileSystemStorage",
+    },
+    "staticfiles": {
+        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+    },
+}
 # 🧱 Default primary key
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 

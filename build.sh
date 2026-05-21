@@ -1,7 +1,12 @@
-#!/bin/bash
+#!/usr/bin/env bash
+# Interrompe a execução se houver algum erro
+set -o errexit
 
-# Install dependencies
+# Instala as dependências
 pip install -r requirements.txt
 
-# Collect static files
-python manage.py collectstatic --noinput
+# Coleta os arquivos estáticos
+python manage.py collectstatic --no-input
+
+# Executa as migrações do banco de dados
+python manage.py migrate
