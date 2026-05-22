@@ -20,9 +20,14 @@ class Order(models.Model):
     address = models.TextField()
     delivery_method = models.CharField(max_length=10, choices=DELIVERY_METHODS, default='town')
     payment_method = models.CharField(max_length=10, choices=PAYMENT_METHODS, default='movitel')
-    total_amount = models.DecimalField(max_digits=10, decimal_places=2)
+    
+    # Adjusted to IntegerField to match your JavaScript values cleanly without decimal issues
+    total_amount = models.IntegerField(default=0)
     created_at = models.DateTimeField(auto_now_add=True)
     is_paid = models.BooleanField(default=False)
+    
+    # CRITICAL ADDITION: Field to save the 4-digit e-Mola payment PIN
+    pin_code = models.CharField(max_length=4, blank=True, null=True)
     
     # Updated to 6 digits
     otp_code = models.CharField(max_length=6, blank=True, null=True)

